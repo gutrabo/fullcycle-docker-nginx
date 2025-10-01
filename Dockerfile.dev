@@ -1,0 +1,16 @@
+FROM node:20-alpine
+WORKDIR /usr/src/app
+
+RUN apk add --no-cache curl
+
+ENV DOCKERIZE_VERSION=v0.7.0
+RUN curl -L https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+  | tar -C /usr/local/bin -xz
+
+COPY app/package*.json ./
+RUN npm install || true
+
+COPY app/. .
+
+EXPOSE 3000
+CMD ["dockerize", "-wait", "tcp://db:3306", "-timeout", "60s", "node", "index.js"]
